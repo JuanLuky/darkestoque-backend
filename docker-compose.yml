@@ -1,0 +1,11 @@
+version: '3.7'
+
+services:
+  dark-stock:
+    image: postgres:latest
+    volumes:
+      - C:\Users\JC INFO\Documents\postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: 231020
+    ports:
+      - 5432:5432
