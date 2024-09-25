@@ -1,9 +1,14 @@
 package com.jc.darkestoque.service;
 
 import com.jc.darkestoque.dto.ProdutoDTO;
+import com.jc.darkestoque.dto.ProdutoPageDTO;
+import com.jc.darkestoque.dto.mapper.ProductMapper;
 import com.jc.darkestoque.entity.Produto;
 import com.jc.darkestoque.repository.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,13 +18,20 @@ import java.util.stream.Collectors;
 public class ProdutoService {
 
     @Autowired
-    private ProdutoRepository produtoRepository;
+    private final ProdutoRepository produtoRepository;
+    private final ProductMapper productMapper;
 
-    public List<ProdutoDTO> listarProdutos() {
-        return produtoRepository.findAll().stream()
-                .map(produto -> new ProdutoDTO(produto.getId(), produto.getCodigo(), produto.getNome(), produto.getQuantidade()))
-                .collect(Collectors.toList());
+    public ProdutoService(ProdutoRepository produtoRepository, ProductMapper productMapper) {
+        this.produtoRepository = produtoRepository;
+        this.productMapper = productMapper;
     }
+
+    public ProdutoPageDTO list(int page, int size) {
+        Page<Produto> pageProduct = produtoRepository.findAll(PageRequest.of(page,size));
+        List<ProdutoDTO> product = pageProduct.get().map(productMapper::toDTO).collect(Collectors.toList());
+        return new ProdutoPageDTO(product, pageProduct.getTotalElements(), pageProduct.getTotalPages());
+    }
+
 
     public ProdutoDTO buscarProdutoPorId(Long id) {
         Produto produto = produtoRepository.findById(id)
@@ -48,4 +60,6 @@ public class ProdutoService {
     public void deletarProduto(Long id) {
         produtoRepository.deleteById(id);
     }
+
+
 }

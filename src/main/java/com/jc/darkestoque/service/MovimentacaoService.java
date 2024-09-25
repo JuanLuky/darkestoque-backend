@@ -1,11 +1,15 @@
 package com.jc.darkestoque.service;
 
 import com.jc.darkestoque.dto.MovimentacaoDTO;
+import com.jc.darkestoque.dto.MovimentacaoPageDTO;
+import com.jc.darkestoque.dto.mapper.MovementMapper;
 import com.jc.darkestoque.entity.Movimentacao;
 import com.jc.darkestoque.entity.Produto;
 import com.jc.darkestoque.repository.MovimentacaoRepository;
 import com.jc.darkestoque.repository.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,15 +20,21 @@ import java.util.stream.Collectors;
 public class MovimentacaoService {
 
     @Autowired
-    private MovimentacaoRepository movimentacaoRepository;
+    private final MovimentacaoRepository movimentacaoRepository;
+    private final ProdutoRepository produtoRepository;
+    private final MovementMapper movementMapper;
 
-    @Autowired
-    private ProdutoRepository produtoRepository;
+    public MovimentacaoService(MovimentacaoRepository movimentacaoRepository, ProdutoRepository produtoRepository, MovementMapper movementMapper) {
+        this.movimentacaoRepository = movimentacaoRepository;
+        this.produtoRepository = produtoRepository;
+        this.movementMapper = movementMapper;
+    }
 
-    public List<MovimentacaoDTO> listarMovimentacoes() {
-        return movimentacaoRepository.findAll().stream()
-                .map(mov -> new MovimentacaoDTO(mov.getId(), mov.getProduto().getId(), mov.getQuantidade(), mov.getTipo(), mov.getDataHora()))
-                .collect(Collectors.toList());
+    public MovimentacaoPageDTO listarMovimentacoes(int page, int size) {
+        // Buscar a página de movimentações do repositório
+        Page<Movimentacao> pageMovimentacao = movimentacaoRepository.findAll(PageRequest.of(page, size));
+        List<MovimentacaoDTO> movimentacoes = pageMovimentacao.get().map(movementMapper::toDTO).collect(Collectors.toList());
+        return new MovimentacaoPageDTO(movimentacoes, pageMovimentacao.getTotalElements(), pageMovimentacao.getTotalPages());
     }
 
     public MovimentacaoDTO salvarMovimentacao(MovimentacaoDTO movimentacaoDTO) {
@@ -39,14 +49,14 @@ public class MovimentacaoService {
 
         if ("Entrada".equalsIgnoreCase(movimentacaoDTO.getTipo())) {
             produto.setQuantidade(produto.getQuantidade() + movimentacaoDTO.getQuantidade());
-        } else if ("Saída".equalsIgnoreCase(movimentacaoDTO.getTipo())) {
+        } else if ("Saida".equalsIgnoreCase(movimentacaoDTO.getTipo())) {
             produto.setQuantidade(produto.getQuantidade() - movimentacaoDTO.getQuantidade());
         }
 
         produtoRepository.save(produto);
         Movimentacao salva = movimentacaoRepository.save(movimentacao);
 
-        return new MovimentacaoDTO(salva.getId(), salva.getProduto().getId(), salva.getQuantidade(), salva.getTipo(), salva.getDataHora());
+        return new MovimentacaoDTO(salva.getId(), salva.getProduto().getId(),salva.getProduto().getNome(), salva.getQuantidade(), salva.getTipo(), salva.getDataHora());
     }
 
     public void deletarMovimentacao(Long id) {
@@ -58,7 +68,7 @@ public class MovimentacaoService {
         // Reverte a movimentação
         if ("Entrada".equalsIgnoreCase(movimentacao.getTipo())) {
             produto.setQuantidade(produto.getQuantidade() - movimentacao.getQuantidade());
-        } else if ("Saída".equalsIgnoreCase(movimentacao.getTipo())) {
+        } else if ("Saida".equalsIgnoreCase(movimentacao.getTipo())) {
             produto.setQuantidade(produto.getQuantidade() + movimentacao.getQuantidade());
         }
 
