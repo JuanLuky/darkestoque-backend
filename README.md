@@ -192,4 +192,4 @@ GET http://localhost:8080/api/movimentacoes
 ## Docker 
 Com a imagem do Postgres no seu Docker execute o camando abaixo para subir o container junto ao projeto.
 ```sql
-docker run --name dark-stock -p 5432:5432 -e POSTGRES_PASSWORD=231020 postgres -d -v C:\Users\JC INFO\Documents\postgres:/var/lib/postgressql/data
+docker run --name dark-stock -p 5432:5432 -e POSTGRES_PASSWORD=231020 postgres -d -v C:\Users\juan33\Documents\postgres:/var/lib/postgresql/data
