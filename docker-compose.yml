@@ -4,7 +4,7 @@ services:
   dark-stock:
     image: postgres:15.3
     volumes:
-      - C:\Users\juan33\Documents\postgres:/var/lib/postgresql/data
+      - C:\Users\juandev\Documents:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: 231020
     ports:
