@@ -3,9 +3,11 @@ version: '3.7'
 services:
   dark-stock:
     image: postgres:15.3
+    container_name: dark-stock-db
+    restart: always
     volumes:
-      - C:\Users\juandev\Documents:/var/lib/postgresql/data
+      - "C:/docker/postgres-data:/var/lib/postgresql/data"
     environment:
       POSTGRES_PASSWORD: 231020
     ports:
-      - 5432:5432
+      - "5432:5432"
